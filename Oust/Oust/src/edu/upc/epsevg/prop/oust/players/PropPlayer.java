@@ -41,12 +41,22 @@ public class PropPlayer implements IPlayer, IAuto {
         int a = Integer.MIN_VALUE;
         int b = Integer.MAX_VALUE;
         
+        System.out.println("=== INICIO BÚSQUEDA - Profundidad: " + MAX_DEPTH + " ===");
+        long startTime = System.currentTimeMillis();
+        int movimientosEvaluados = 0;
+        
         for (Point m : moves) {
-            if (timeout) break;
+            if (timeout) {
+                System.out.println("⏱️ TIMEOUT después de evaluar " + movimientosEvaluados + "/" + moves.size() + " movimientos");
+                break;
+            }
             
             GameStatus ns = new GameStatus(s);
             List<Point> path = completarPath(ns, m, p);
             int val = minimax(ns, 1, a, b, p);
+            if (timeout) continue;
+            movimientosEvaluados++;
+            System.out.println("Movimiento " + movimientosEvaluados + "/" + moves.size() + ": " + m + " → valor: " + val);
             
             if (val > best) {
                 best = val;
@@ -54,14 +64,28 @@ public class PropPlayer implements IPlayer, IAuto {
             }
             
             a = Math.max(a, best);
-            if (best >= b) break;
+            if (best >= b) {
+                System.out.println("✂️ Poda alpha-beta en nivel raíz");
+                break;
+            }
         }
+        
+        long elapsed = System.currentTimeMillis() - startTime;
+        System.out.println("=== FIN BÚSQUEDA ===");
+        System.out.println("Tiempo: " + elapsed + "ms");
+        System.out.println("Nodos visitados: " + nodesVisited);
+        System.out.println("Movimientos evaluados: " + movimientosEvaluados + "/" + moves.size());
+        System.out.println("Mejor valor: " + best);
+        if (timeout) {
+            System.out.println("⚠️ BÚSQUEDA INTERRUMPIDA POR TIMEOUT");
+        }
+        System.out.println("========================\n");
         
         return new PlayerMove(bestPath, nodesVisited, MAX_DEPTH, SearchType.MINIMAX);
     }
     
     /**
-     * Completa el path de una jugada
+     * Completa el path de una jugada (incluye capturas encadenadas)
      */
     private List<Point> completarPath(GameStatus s, Point m, PlayerType p) {
         List<Point> path = new ArrayList<>();
@@ -96,7 +120,7 @@ public class PropPlayer implements IPlayer, IAuto {
     }
     
     /**
-     * Minimax
+     * Minimax con Alpha-Beta
      */
     private int minimax(GameStatus s, int d, int a, int b, PlayerType maxP) {
         nodesVisited++;
@@ -144,6 +168,8 @@ public class PropPlayer implements IPlayer, IAuto {
     @Override
     public void timeout() {
         timeout = true;
+        System.out.println("\n⏱️⏱️⏱️ TIMEOUT DETECTADO ⏱️⏱️⏱️");
+        System.out.println("Interrumpiendo búsqueda minimax...\n");
     }
     
     @Override

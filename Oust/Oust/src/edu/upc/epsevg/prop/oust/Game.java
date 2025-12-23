@@ -1,6 +1,8 @@
 package edu.upc.epsevg.prop.oust;
 
 import edu.upc.epsevg.prop.oust.players.HumanPlayer;
+import edu.upc.epsevg.prop.oust.players.IDSPlayer;
+import edu.upc.epsevg.prop.oust.players.PropPlayer;
 import edu.upc.epsevg.prop.oust.players.RandomPlayer;
 
 
@@ -38,17 +40,17 @@ public class Game {
                 //---------------------------------------------
                 // Enjoy!
                 //---------------------------------------------
-                //IPlayer player1 = new RandomPlayer("");
-                IPlayer player1 = new MOustValuablePlayer();
-                IPlayer player2 = new HumanPlayer("Human2");
-                
+                //IPlayer player1 = new HumanPlayer("");
+                IPlayer player2 = new MOustValuablePlayer();
+                //IPlayer player1 = new PropPlayer("Human2", 2);
+                IPlayer player1 = new IDSPlayer("Human2");
                                 
                 
                 //---------------------------------------------
                 // Customitzeu els paràmetres
                 //---------------------------------------------
                 int midaCostat = 7;
-                int timeoutEnSegons = 5;
+                int timeoutEnSegons = 3;
                 boolean pauseEnAutomatic = false;
                 
                 new Board(player1 , player2, midaCostat /*mida*/,  timeoutEnSegons/*s timeout*/, pauseEnAutomatic);
