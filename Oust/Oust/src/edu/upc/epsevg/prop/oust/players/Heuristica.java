@@ -6,14 +6,29 @@ import java.awt.Point;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Heurística para evaluar estados del juego Oust.
+ * 
+ */
 public class Heuristica {
 
+    /**
+     * Direcciones de los vecinos de una pieza.
+     */
     private static final int[][] DIRS = {
         {0, 1}, {1, 0}, {1, 1}, {0, -1}, {-1, 0}, {-1, -1}
     };
     
-    private static final Set<Point> SEGUNDA_LINEA = new HashSet<>();
+    /**
+     * Conjunto que almacena los puntos tacticos del tablero.
+     */
+    private static final Set<Point> linea_tactica = new HashSet<>();
     
+    /**
+     * Calcula y almacena los puntos que están a dos casillas del borde del tablero.
+     * 
+     * @param s Estado actual del juego
+     */
     public static void tactic_line(GameStatus s) {
         
         int size = s.getSize();
@@ -21,27 +36,33 @@ public class Heuristica {
         int start = 2;
         int end = size - 1;
         for (int i = start; i <= end; i++) {
-            SEGUNDA_LINEA.add(new Point(start, i));
-            if (i != start) SEGUNDA_LINEA.add(new Point (i, start));
+            linea_tactica.add(new Point(start, i));
+            if (i != start) linea_tactica.add(new Point (i, start));
         }
         start = size2 - 3;
         end = size - 1;
         for (int i = start; i >= end; i--) {
-            SEGUNDA_LINEA.add(new Point(start, i));
-            if (i != start) SEGUNDA_LINEA.add(new Point (i, start));
+            linea_tactica.add(new Point(start, i));
+            if (i != start) linea_tactica.add(new Point (i, start));
         }
         start = 3;
         end = size;
         while (start != size - 1) {
-            SEGUNDA_LINEA.add(new Point(start, end));
-            SEGUNDA_LINEA.add(new Point (end, start));
+            linea_tactica.add(new Point(start, end));
+            linea_tactica.add(new Point (end, start));
             start++;
             end++;
         }    
         
     }
     
-
+    /**
+     * Evalúa un estado del juego desde la perspectiva de un jugador.
+     * 
+     * @param s Estado actual del juego
+     * @param p Jugador para el cual se evalúa el estado
+     * @return Valor heurístico del estado
+     */
     public static int eval(GameStatus s, PlayerType p) {
         int score = 0;
         int size = s.getSquareSize();
@@ -69,7 +90,7 @@ public class Heuristica {
                 }
                 int val = 25;
 
-                if (SEGUNDA_LINEA.contains(pt)) {
+                if (linea_tactica.contains(pt)) {
                     val += 15;
                 }
 
@@ -173,6 +194,15 @@ public class Heuristica {
         return score;
     }
     
+    /**
+     * Realiza una búsqueda en profundidad (DFS) para calcular el tamaño de un grupo.
+     * 
+     * @param s Estado del juego
+     * @param start Punto inicial del grupo
+     * @param player Color del jugador cuyo grupo se está calculando
+     * @param visitados Conjunto de puntos ya visitados
+     * @return Tamaño del grupo encontrado
+     */
     private static int dfsGrupo(GameStatus s, Point start, PlayerType player, Set<Point> visitados) {
         java.util.Stack<Point> stack = new java.util.Stack<>();
         stack.push(start);
