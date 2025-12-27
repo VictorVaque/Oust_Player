@@ -14,21 +14,41 @@ public class Heuristica {
     
     private static final Set<Point> SEGUNDA_LINEA = new HashSet<>();
     
-    static {
-        int[] puntosX = {2,2,2,2,2,3,4,5,6,7,8,9,10,10,10,10,10,9,8,7,6,5,4,3};
-        int[] puntosY = {2,3,4,5,6,7,8,9,10,10,10,10,10,9,8,7,6,5,4,3,2,2,2,2};
+    public static void tactic_line(GameStatus s) {
         
-        for (int i = 0; i < puntosX.length; i++) {
-            SEGUNDA_LINEA.add(new Point(puntosX[i], puntosY[i]));
+        int size = s.getSize();
+        int size2 = s.getSquareSize();
+        int start = 2;
+        int end = size - 1;
+        for (int i = start; i <= end; i++) {
+            SEGUNDA_LINEA.add(new Point(start, i));
+            if (i != start) SEGUNDA_LINEA.add(new Point (i, start));
         }
+        start = size2 - 3;
+        end = size - 1;
+        for (int i = start; i >= end; i--) {
+            SEGUNDA_LINEA.add(new Point(start, i));
+            if (i != start) SEGUNDA_LINEA.add(new Point (i, start));
+        }
+        start = 3;
+        end = size;
+        while (start != size - 1) {
+            SEGUNDA_LINEA.add(new Point(start, end));
+            SEGUNDA_LINEA.add(new Point (end, start));
+            start++;
+            end++;
+        }    
+        
     }
+    
 
     public static int eval(GameStatus s, PlayerType p) {
         int score = 0;
         int size = s.getSquareSize();
         
         Set<Point> Visitados = new HashSet<>();
-
+        if (s.getSize() > 6) tactic_line(s);
+        
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Point pt = new Point(i, j);
@@ -39,13 +59,13 @@ public class Heuristica {
                 if (c != p) {
                     if (!Visitados.contains(pt)) {
                         int tamanoGrupo = dfsGrupo(s, pt, c, Visitados);
-                        score -= tamanoGrupo * tamanoGrupo * 900;
+                        score -= tamanoGrupo * tamanoGrupo * 800;
                     }
                     continue;
                 }
                 if (!Visitados.contains(pt)) {
                     int tamanoGrupo = dfsGrupo(s, pt, c, Visitados);
-                    score += tamanoGrupo * tamanoGrupo * 75;
+                    score += tamanoGrupo * tamanoGrupo * 120;
                 }
                 int val = 25;
 

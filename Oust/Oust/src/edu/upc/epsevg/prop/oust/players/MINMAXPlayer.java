@@ -12,23 +12,25 @@ import java.util.List;
 
 /**
  * Implementación de un jugador para el juego Oust que utiliza el algoritmo
- * Minimax con poda Alpha-Beta y búsqueda en profundidad iterativa (IDS).
+ * Minimax con poda Alpha-Beta a una profundidad constante.
  * 
  */
-public class IDSPlayer implements IPlayer, IAuto {
+public class MINMAXPlayer implements IPlayer, IAuto {
     
     private String name;
     private boolean timeout;
     private int nodesVisited;
-    private int currentMaxDepth;
+    private final int profundidadMaxima;
     
     /**
-     * Constructor del jugador IDS.
+     * Constructor del jugador MINMAX.
      * 
      * @param name Nombre del jugador
+     * @param profundidadMaxima Profundidad máxima de búsqueda para el algoritmo Minimax.
      */
-    public IDSPlayer(String name) {
+    public MINMAXPlayer(String name, int profundidadMaxima) {
         this.name = name;
+        this.profundidadMaxima = profundidadMaxima;
     }
     
     /**
@@ -43,89 +45,77 @@ public class IDSPlayer implements IPlayer, IAuto {
     public PlayerMove move(GameStatus s) {
         timeout = false;
         nodesVisited = 0;
-        currentMaxDepth = 0;
         
         List<Point> moves = s.getMoves();
         if (moves.isEmpty()) {
-            return new PlayerMove(null, nodesVisited, 0, SearchType.MINIMAX);
+            return new PlayerMove(null, nodesVisited, profundidadMaxima, SearchType.MINIMAX);
         }
         
         PlayerType p = s.getCurrentPlayer();
         int best = Integer.MIN_VALUE;
         List<Point> bestPath = null;
         
-        System.out.println("=== INICIO BÚSQUEDA IDS ===");
+        System.out.println("=== INICIO BÚSQUEDA PROFUNDIDAD CONSTANTE ===");
+        System.out.println("Profundidad máxima: " + profundidadMaxima);
         long startTime = System.currentTimeMillis();
         
-        for (currentMaxDepth = 1; !timeout; currentMaxDepth++) {
-            System.out.println("--- Probando profundidad: " + currentMaxDepth + " ---");
+        int a = Integer.MIN_VALUE;
+        int b = Integer.MAX_VALUE;
+        
+        for (Point m : moves) {
+            if (timeout) break;
             
-            int currentDepthBest = Integer.MIN_VALUE;
-            List<Point> currentDepthBestPath = null;
-            int a = Integer.MIN_VALUE;
-            int b = Integer.MAX_VALUE;
+            // Crear una copia para simular el turno completo
+            GameStatus ns = new GameStatus(s);
+            ns.placeStone(m);
+            List<Point> path = new ArrayList<>();
+            path.add(m);
             
-            for (Point m : moves) {
-                if (timeout) break;
+            // Jugar el resto del turno
+            PlayerType jugadorActual = p;
+            while (ns.getCurrentPlayer() == jugadorActual && !ns.isGameOver()) {
+                List<Point> opciones = ns.getMoves();
+                if (opciones.isEmpty()) break;
                 
-                GameStatus ns = new GameStatus(s);
-                ns.placeStone(m);
-                List<Point> path = new ArrayList<>();
-                path.add(m);
-                
-                PlayerType jugadorActual = p;
-                while (ns.getCurrentPlayer() == jugadorActual && !ns.isGameOver()) {
-                    List<Point> opciones = ns.getMoves();
-                    if (opciones.isEmpty()) break;
-                    
-                    Point mejor = opciones.get(0);
-                    if (opciones.size() > 1) {
-                        int mejorValor = Integer.MIN_VALUE;
-                        for (Point op : opciones) {
-                            GameStatus temp = new GameStatus(ns);
-                            temp.placeStone(op);
-                            int valorTemp = Heuristica.eval(temp, jugadorActual);
-                            if (valorTemp > mejorValor) {
-                                mejorValor = valorTemp;
-                                mejor = op;
-                            }
+                // Elegir la mejor opción según heurística
+                Point mejor = opciones.get(0);
+                if (opciones.size() > 1) {
+                    int mejorValor = Integer.MIN_VALUE;
+                    for (Point op : opciones) {
+                        GameStatus temp = new GameStatus(ns);
+                        temp.placeStone(op);
+                        int valorTemp = Heuristica.eval(temp, jugadorActual);
+                        if (valorTemp > mejorValor) {
+                            mejorValor = valorTemp;
+                            mejor = op;
                         }
                     }
-                    ns.placeStone(mejor);
-                    path.add(mejor);
                 }
-                
-                int val = minimax(ns, 1, a, b, p);
-                if (timeout) break;
-                
-                if (val > currentDepthBest) {
-                    currentDepthBest = val;
-                    currentDepthBestPath = path;
-                }
-                
-                a = Math.max(a, currentDepthBest);
-                if (currentDepthBest >= b) break;
+                ns.placeStone(mejor);
+                path.add(mejor);
             }
             
-            if (!timeout) {
-                best = currentDepthBest;
-                bestPath = currentDepthBestPath;
-                System.out.println("Profundidad " + currentMaxDepth + " completada: mejor valor = " + best);
-            } else {
-                System.out.println("Profundidad " + currentMaxDepth + " interrumpida por timeout");
-                break;
+            // Evaluar con minimax el estado resultante
+            int val = minimax(ns, 1, a, b, p);
+            if (timeout) break;
+            
+            if (val > best) {
+                best = val;
+                bestPath = path;
+                a = Math.max(a, best);
             }
+            
+            if (best >= b) break;
         }
         
         long elapsed = System.currentTimeMillis() - startTime;
-        System.out.println("=== FIN BÚSQUEDA IDS ===");
-        System.out.println("Profundidad alcanzada: " + (currentMaxDepth - 1));
+        System.out.println("=== FIN BÚSQUEDA ===");
         System.out.println("Tiempo: " + elapsed + "ms");
         System.out.println("Nodos visitados: " + nodesVisited);
         System.out.println("Mejor valor: " + best);
         System.out.println("========================\n");
         
-        return new PlayerMove(bestPath, nodesVisited, currentMaxDepth - 1, SearchType.MINIMAX);
+        return new PlayerMove(bestPath, nodesVisited, profundidadMaxima, SearchType.MINIMAX);
     }
     
     /**
@@ -143,7 +133,8 @@ public class IDSPlayer implements IPlayer, IAuto {
         if (timeout) return 0;
         nodesVisited++;
         
-        if (d >= currentMaxDepth) {
+
+        if (d >= profundidadMaxima || s.isGameOver()) {
             return Heuristica.eval(s, maxP);
         }
         
@@ -161,13 +152,16 @@ public class IDSPlayer implements IPlayer, IAuto {
         for (Point movInicial : movimientosIniciales) {
             if (timeout) break;
             
+            // Crear copia y jugar el turno completo
             GameStatus ns = new GameStatus(s);
             ns.placeStone(movInicial);
             
+            // Jugar el resto del turno
             while (ns.getCurrentPlayer() == jugadorActual && !ns.isGameOver()) {
                 List<Point> opciones = ns.getMoves();
                 if (opciones.isEmpty()) break;
                 
+                // Elegir la mejor opción según heurística
                 Point mejor = opciones.get(0);
                 if (opciones.size() > 1) {
                     int mejorValor = Integer.MIN_VALUE;
@@ -207,8 +201,7 @@ public class IDSPlayer implements IPlayer, IAuto {
     @Override
     public void timeout() {
         timeout = true;
-        System.out.println("\n⏱️⏱️⏱️ TIMEOUT DETECTADO ⏱️⏱️⏱️");
-        System.out.println("Interrumpiendo búsqueda IDS...\n");
+        System.out.println("\n⏱️ TIMEOUT DETECTADO - Interrumpiendo búsqueda...");
     }
     
     /**
