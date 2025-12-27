@@ -1,5 +1,6 @@
-package edu.upc.epsevg.prop.oust.players;
+package edu.upc.epsevg.prop.oust.players.FontsereVaque;
 
+import edu.upc.epsevg.prop.oust.players.FontsereVaque.Heuristica;
 import edu.upc.epsevg.prop.oust.GameStatus;
 import edu.upc.epsevg.prop.oust.IAuto;
 import edu.upc.epsevg.prop.oust.IPlayer;
@@ -15,7 +16,7 @@ import java.util.List;
  * Minimax con poda Alpha-Beta y búsqueda en profundidad iterativa (IDS).
  * 
  */
-public class IDSPlayer implements IPlayer, IAuto {
+public class PlayerMiniMaxIDS implements IPlayer, IAuto {
     
     private String name;
     private boolean timeout;
@@ -27,8 +28,8 @@ public class IDSPlayer implements IPlayer, IAuto {
      * 
      * @param name Nombre del jugador
      */
-    public IDSPlayer(String name) {
-        this.name = name;
+    public PlayerMiniMaxIDS() {
+        this.name = "FontsereVaque";
     }
     
     /**

@@ -1,5 +1,6 @@
-package edu.upc.epsevg.prop.oust.players;
+package edu.upc.epsevg.prop.oust.players.FontsereVaque;
 
+import edu.upc.epsevg.prop.oust.players.FontsereVaque.Heuristica;
 import edu.upc.epsevg.prop.oust.GameStatus;
 import edu.upc.epsevg.prop.oust.IAuto;
 import edu.upc.epsevg.prop.oust.IPlayer;
@@ -15,7 +16,7 @@ import java.util.List;
  * Minimax con poda Alpha-Beta a una profundidad constante.
  * 
  */
-public class MINMAXPlayer implements IPlayer, IAuto {
+public class PlayerMiniMax implements IPlayer, IAuto {
     
     private String name;
     private boolean timeout;
@@ -28,7 +29,7 @@ public class MINMAXPlayer implements IPlayer, IAuto {
      * @param name Nombre del jugador
      * @param profundidadMaxima Profundidad máxima de búsqueda para el algoritmo Minimax.
      */
-    public MINMAXPlayer(String name, int profundidadMaxima) {
+    public PlayerMiniMax(String name, int profundidadMaxima) {
         this.name = name;
         this.profundidadMaxima = profundidadMaxima;
     }
@@ -63,7 +64,6 @@ public class MINMAXPlayer implements IPlayer, IAuto {
         int b = Integer.MAX_VALUE;
         
         for (Point m : moves) {
-            if (timeout) break;
             
             // Crear una copia para simular el turno completo
             GameStatus ns = new GameStatus(s);
@@ -97,7 +97,7 @@ public class MINMAXPlayer implements IPlayer, IAuto {
             
             // Evaluar con minimax el estado resultante
             int val = minimax(ns, 1, a, b, p);
-            if (timeout) break;
+
             
             if (val > best) {
                 best = val;
@@ -130,7 +130,6 @@ public class MINMAXPlayer implements IPlayer, IAuto {
      * @return Valor heurístico del estado s para el jugador maxP
      */
     private int minimax(GameStatus s, int d, int a, int b, PlayerType maxP) {
-        if (timeout) return 0;
         nodesVisited++;
         
 
@@ -150,7 +149,6 @@ public class MINMAXPlayer implements IPlayer, IAuto {
         int val = max ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         
         for (Point movInicial : movimientosIniciales) {
-            if (timeout) break;
             
             // Crear copia y jugar el turno completo
             GameStatus ns = new GameStatus(s);
@@ -179,7 +177,6 @@ public class MINMAXPlayer implements IPlayer, IAuto {
             }
             
             int v = minimax(ns, d + 1, a, b, maxP);
-            if (timeout) break;
             
             if (max) {
                 val = Math.max(val, v);

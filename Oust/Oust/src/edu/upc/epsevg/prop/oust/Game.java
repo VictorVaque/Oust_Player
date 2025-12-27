@@ -1,8 +1,8 @@
 package edu.upc.epsevg.prop.oust;
 
 import edu.upc.epsevg.prop.oust.players.HumanPlayer;
-import edu.upc.epsevg.prop.oust.players.IDSPlayer;
-import edu.upc.epsevg.prop.oust.players.MINMAXPlayer;
+import edu.upc.epsevg.prop.oust.players.FontsereVaque.PlayerMiniMaxIDS;
+import edu.upc.epsevg.prop.oust.players.FontsereVaque.PlayerMiniMax;
 import edu.upc.epsevg.prop.oust.players.RandomPlayer;
 
 
@@ -43,7 +43,7 @@ public class Game {
                 //IPlayer player1 = new HumanPlayer("");
                 IPlayer player1 = new MOustValuablePlayer();
                 //IPlayer player2 = new MINMAXPlayer("Human2", 3);
-                IPlayer player2 = new IDSPlayer("Human2");
+                IPlayer player2 = new PlayerMiniMaxIDS();
                                 
                 
                 //---------------------------------------------

@@ -1,4 +1,4 @@
-package edu.upc.epsevg.prop.oust.players;
+package edu.upc.epsevg.prop.oust.players.FontsereVaque;
 
 import edu.upc.epsevg.prop.oust.GameStatus;
 import edu.upc.epsevg.prop.oust.PlayerType;
